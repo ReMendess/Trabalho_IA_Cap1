@@ -61,7 +61,7 @@ def menu():
         if opcao == 1:
             #cadastro de cultura e adicionando ela a lista inicial
             cultura = str(input("Informe a cultura (milho/soja): ")).lower().strip()
-            dados_culturas.append({"cultura": cultura, "area": area_plantio, "insumos": None})
+            dados_culturas.append({"cultura": cultura, "area": area_plantio, "insumos": []})
             print("Cultura {} cadastrada com sucesso!".format(cultura))
             #faz o calculo de insumos e coloca de acordo com o indice cadastrado anteriormente
         elif opcao == 2:
@@ -70,13 +70,15 @@ def menu():
                 print(f"{i} - {cultura['cultura']} (Área: {cultura['area']}m2)")
             index = int(input("Escolha a cultura pelo indice: "))
             insumos = calcular_insumos(dados_culturas[index]["cultura"], dados_culturas[index]["area"])
-            dados_culturas[index]["insumos"] = insumos
+            dados_culturas[index]["insumos"].append(insumos)
             #apresenta os dados
         elif opcao == 3:
             for i, dado in enumerate(dados_culturas):
                 print(f"{i}: {dado['cultura']} - Área: {dado['area']:.2f} m²")
                 if dado["insumos"]:
-                    print(f"   Insumos: {dado['insumos']['produto']} - {dado['insumos']['total']:.2f} mL")
+                    print("Insumos: ")
+                    for j, insumos in enumerate (dado["insumos"]):
+                        print(f"      {j + 1}. {insumos['produto']} - {insumos['total']:.2f} mL")
         elif opcao == 4:
             for i, dado in enumerate(dados_culturas):
                 print(f"{i}: {dado['cultura']} - Área: {dado['area']:.2f} m²")
@@ -106,7 +108,6 @@ def menu():
             time.sleep(1)
             break
 menu()
-
 
 
 
