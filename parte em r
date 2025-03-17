@@ -1,0 +1,14 @@
+install.packages("dplyr")
+library(dplyr)
+dados <- tibble(
+  culturas = c("milho","soja"),
+  area = c("225 m2","225 m2"),
+  Insumos = c("Fertlizante"),
+  Quantidade_insumos = c(300,150),
+)
+estatisticas <- dados %>%
+  summarise(
+    media_Insumos = mean(Quantidade_insumos, na.rm = TRUE),
+    desvio_Insumos = sd(Quantidade_insumos, na.rm = TRUE)
+  )
+print(estatisticas)
