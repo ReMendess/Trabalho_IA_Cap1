@@ -16,6 +16,7 @@ if sexo == "f":
 else:
     print("Ola {} ! Seja bem-vindo ao seu assistente de agricultura virtual ! ".format(nome))
 time.sleep(1)
+
 #definicao de formato de plantio
 print("-" * 83)
 formato_plantio = str(input("Digite Qual o formato do seu plantio: (Ex: Quadrado,Circular,Retangular,Triangulo): ")).lower()
@@ -38,6 +39,8 @@ else:
 print("Calculando Area..")
 time.sleep(1)
 print("A area do terreno corresponde a {:.2f} m2".format(area_plantio))
+
+# função para calcular insumos
 dados_culturas = []
 def calcular_insumos(cultura, area_plantio):
     produto = input("Informe o nome do produto: ")
@@ -45,6 +48,7 @@ def calcular_insumos(cultura, area_plantio):
     total_insumos = dose_por_metro * area_plantio
     print(f"Para {area_plantio:.2f} m² de {cultura}, você precisará de {total_insumos:.2f} mL de {produto}.")
     return {"produto": produto, "dose_por_metro": dose_por_metro, "total": total_insumos}
+    
 # Menu Principal
 def menu():
     while True:
@@ -63,6 +67,7 @@ def menu():
             cultura = str(input("Informe a cultura (milho/soja): ")).lower().strip()
             dados_culturas.append({"cultura": cultura, "area": area_plantio, "insumos": []})
             print("Cultura {} cadastrada com sucesso!".format(cultura))
+            
             #faz o calculo de insumos e coloca de acordo com o indice cadastrado anteriormente
         elif opcao == 2:
             print("\nCulturas cadastradas:")
@@ -71,6 +76,7 @@ def menu():
             index = int(input("Escolha a cultura pelo indice: "))
             insumos = calcular_insumos(dados_culturas[index]["cultura"], dados_culturas[index]["area"])
             dados_culturas[index]["insumos"].append(insumos)
+            
             #apresenta os dados
         elif opcao == 3:
             for i, dado in enumerate(dados_culturas):
