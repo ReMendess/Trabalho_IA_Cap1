@@ -44,7 +44,7 @@ print("A area do terreno corresponde a {:.2f} m2".format(area_plantio))
 # função para calcular insumos
 dados_culturas = []
 def calcular_insumos(cultura, area_plantio):
-    produto = input("Informe o nome do produto: ")
+    produto = str(input("Informe o nome do produto: "))
     dose_por_metro = float(input("Informe a dose por metro quadrado (mL/m²): "))
     total_insumos = dose_por_metro * area_plantio
     print(f"Para {area_plantio:.2f} m² de {cultura}, você precisará de {total_insumos:.2f} mL de {produto}.")
