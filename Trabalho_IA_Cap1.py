@@ -2,54 +2,18 @@ import time
 import math
 import os
 import pandas as pd
+import requests
+import json
 
 # culturas escolhidas , milho e soja
-
-#menu interativo principal
-print("---------- Cadastro Inicial ----------")
-nome = str(input("1 - Inserir nome: ")).strip()
-sexo = str(input("2 - Masculino/Feminino [M/F]: ")).lower().strip()
-idade = int(input("3 - Inserir Idade: "))
-print("Fazendo cadastro...")
-time.sleep(2)
-if sexo == "f":
-    print("Ola {}! Seja bem-vinda ao seu assistente de agricultura virtual! ".format(nome))
-else:
-    print("Ola {} ! Seja bem-vindo ao seu assistente de agricultura virtual ! ".format(nome))
-time.sleep(1)
-
-#definicao de formato de plantio
-print("-" * 83)
-formato_plantio = str(input("Digite Qual o formato do seu plantio: (Ex: Quadrado,Circular,Retangular,Triangulo): ")).lower()
-while formato_plantio not in ["quadrado", "triangulo", "retangular", "circular"]:
-        formato_plantio = str(input("Formato Invalido ! digite Qual o formato do seu plantio: (Ex: Quadrado,Circular,Retangular,Triangulo) "))
-if formato_plantio == "quadrado":
-    base = float(input("Digite qual a base do terreno: "))
-    area_plantio = base ** 2
-elif formato_plantio == "triangulo":
-    base = float(input("Digite qual a base do terreno: "))
-    altura = float(input("Digite qual altura do terreno: "))
-    area_plantio = base * altura / 2
-elif formato_plantio == "retangular":
-    base = float(input("Digite qual a base do terreno: "))
-    altura = float(input("Digite qual altura do terreno: "))
-    area_plantio = base * altura
-else:
-    raio = float(input("Digite o raio do terreno: "))
-    area_plantio = (raio ** 2) * 3.14
-print("Calculando Area..")
-time.sleep(1)
-print("A area do terreno corresponde a {:.2f} m2".format(area_plantio))
-
-# função para calcular insumos
 dados_culturas = []
+# função para calcular insumos
 def calcular_insumos(cultura, area_plantio):
     produto = str(input("Informe o nome do produto: "))
     dose_por_metro = float(input("Informe a dose por metro quadrado (mL/m²): "))
     total_insumos = dose_por_metro * area_plantio
     print(f"Para {area_plantio:.2f} m² de {cultura}, você precisará de {total_insumos:.2f} mL de {produto}.")
     return {"produto": produto, "dose_por_metro": dose_por_metro, "total": total_insumos}
-    
 # Menu Principal
 def menu():
     while True:
@@ -64,12 +28,12 @@ def menu():
         opcao = int(input("Escolha uma opcao: "))
 
         if opcao == 1:
-            #cadastro de cultura e adicionando ela a lista inicial
+            # cadastro de cultura e adicionando ela a lista inicial
             cultura = str(input("Informe a cultura (milho/soja): ")).lower().strip()
             dados_culturas.append({"cultura": cultura, "area": area_plantio, "insumos": []})
             print("Cultura {} cadastrada com sucesso!".format(cultura))
-            
-            #faz o calculo de insumos e coloca de acordo com o indice cadastrado anteriormente
+
+            # faz o calculo de insumos e coloca de acordo com o indice cadastrado anteriormente
         elif opcao == 2:
             print("\nCulturas cadastradas:")
             for i, cultura in enumerate(dados_culturas):
@@ -77,8 +41,8 @@ def menu():
             index = int(input("Escolha a cultura pelo indice: "))
             insumos = calcular_insumos(dados_culturas[index]["cultura"], dados_culturas[index]["area"])
             dados_culturas[index]["insumos"].append(insumos)
-            
-            #apresenta os dados
+
+            # apresenta os dados
         elif opcao == 3:
             if not dados_culturas:
                 print("Nenhuma cultura cadastrada ainda.")
@@ -103,7 +67,7 @@ def menu():
 
                 dados_culturas[index]["cultura"] = nova_cultura
                 dados_culturas[index]["area"] = nova_area
-                dados_culturas[index]["insumos"] = None  #reseta os insumos
+                dados_culturas[index]["insumos"] = None  # reseta os insumos
 
                 print("Dados atualizados com sucesso!")
             else:
@@ -123,4 +87,59 @@ def menu():
             df.to_csv("dados_agricultura.csv", index=False)
             print("Dados salvos em 'dados_agricultura.csv'.")
             break
+#funcao para obter cordenadas de uma cidade
+def obter_coordenadas(cidade):
+    url = f"https://geocoding-api.open-meteo.com/v1/search?name={cidade}&count=1&format=json"
+    resposta = requests.get(url)
+    
+    if resposta.status_code == 200:
+        dados = resposta.json()
+        if "results" in dados and len(dados["results"]) > 0:
+            cidade_info = dados["results"][0]
+            latitude = cidade_info["latitude"]
+            longitude = cidade_info["longitude"]
+            return latitude, longitude
+    return None, None
+# menu interativo principal
+print("---------- Cadastro Inicial ----------")
+nome = str(input("1 - Inserir nome: ")).strip()
+sexo = str(input("2 - Masculino/Feminino [M/F]: ")).lower().strip()
+idade = int(input("3 - Inserir Idade: "))
+print("Fazendo cadastro...")
+time.sleep(2)
+if sexo == "f":
+    print("Ola {}! Seja bem-vinda ao seu assistente de agricultura virtual! ".format(nome))
+else:
+    print("Ola {} ! Seja bem-vindo ao seu assistente de agricultura virtual ! ".format(nome))
+time.sleep(1)
+
+# definicao de formato de plantio
+print("-" * 83)
+formato_plantio = str(
+    input("Digite Qual o formato do seu plantio: (Ex: Quadrado,Circular,Retangular,Triangulo): ")).lower()
+while formato_plantio not in ["quadrado", "triangulo", "retangular", "circular"]:
+    formato_plantio = str(
+        input("Formato Invalido ! digite Qual o formato do seu plantio: (Ex: Quadrado,Circular,Retangular,Triangulo) "))
+if formato_plantio == "quadrado":
+    base = float(input("Digite qual a base do terreno: "))
+    area_plantio = base ** 2
+elif formato_plantio == "triangulo":
+    base = float(input("Digite qual a base do terreno: "))
+    altura = float(input("Digite qual altura do terreno: "))
+    area_plantio = base * altura / 2
+elif formato_plantio == "retangular":
+    base = float(input("Digite qual a base do terreno: "))
+    altura = float(input("Digite qual altura do terreno: "))
+    area_plantio = base * altura
+else:
+    raio = float(input("Digite o raio do terreno: "))
+    area_plantio = (raio ** 2) * 3.14
+print("Calculando Area..")
+time.sleep(1)
+cidade = input("Informe o nome da cidade do terreno: ")
+latitude, longitude = obter_coordenadas(cidade)
+with open("coordenadas.csv", "w") as f:
+    f.write(f"{cidade},{latitude},{longitude}")
+print(f"Cidade {cidade} salva!")
+
 menu()
