@@ -1,6 +1,7 @@
 import time
 import math
 import os
+import pandas as pd
 
 # culturas escolhidas , milho e soja
 
@@ -79,12 +80,17 @@ def menu():
             
             #apresenta os dados
         elif opcao == 3:
-            for i, dado in enumerate(dados_culturas):
-                print(f"{i}: {dado['cultura']} - Área: {dado['area']:.2f} m²")
-                if dado["insumos"]:
-                    print("Insumos: ")
-                    for j, insumos in enumerate (dado["insumos"]):
-                        print(f"      {j + 1}. {insumos['produto']} - {insumos['total']:.2f} mL")
+            if not dados_culturas:
+                print("Nenhuma cultura cadastrada ainda.")
+                time.sleep(2)
+            else:
+                for i, dado in enumerate(dados_culturas):
+                    print(f"{i}: {dado['cultura']} - Área: {dado['area']:.2f} m²")
+                    if dado["insumos"]:
+                        print("Insumos: ")
+                        for j, insumos in enumerate(dado["insumos"]):
+                            print(f"      {j + 1}. {insumos['produto']} - {insumos['total']:.2f} mL")
+                            time.sleep(4)
         elif opcao == 4:
             for i, dado in enumerate(dados_culturas):
                 print(f"{i}: {dado['cultura']} - Área: {dado['area']:.2f} m²")
@@ -112,10 +118,9 @@ def menu():
         elif opcao == 6:
             print(("encerrando programa..."))
             time.sleep(1)
+            # Salvar os dados coletados em um arquivo CSV
+            df = pd.DataFrame(dados_culturas)
+            df.to_csv("dados_agricultura.csv", index=False)
+            print("Dados salvos em 'dados_agricultura.csv'.")
             break
 menu()
-
-
-
-
-
