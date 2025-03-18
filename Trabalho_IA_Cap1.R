@@ -1,3 +1,5 @@
+install.packages("dplyr")   # Para processamento de dados
+
 # Carregar os pacotes necessários
 library(dplyr)
 
