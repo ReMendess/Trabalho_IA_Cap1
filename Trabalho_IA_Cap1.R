@@ -26,7 +26,7 @@ head(dados)  # Exibe as primeiras linhas do CSV
 str(dados)   # Mostra a estrutura dos dados
 
 # Função para conectar na API e pegar dados climáticos
-api_key <- "SUA_CHAVE_AQUI"
+api_key <- "1104b47952d2b6a46276493eaa002c77"
 
 # Função para buscar dados climáticos por latitude e longitude
 obter_dados_clima <- function(lat, lon) {
