@@ -1,15 +1,65 @@
 install.packages("dplyr") 
 install.packages("jsonlite")
 install.packages("tidyr")
+install.packages("httr")
+
 
 
 library(jsonlite)
 library(dplyr)
 library(tidyr)
+library(httr)
 
+
+getwd()  # Mostra o diretório atual
 
 # Ler o arquivo CSV
 dados <- read.csv("dados_agricultura.csv", stringsAsFactors=FALSE)
+
+# Ler o arquivo CSV
+local <- read.csv("coordenadas.csv", header = FALSE, sep = ",", stringsAsFactors = FALSE)
+
+# Renomear as colunas manualmente
+colnames(local) <- c("Cidade", "Latitude", "Longitude")
+
+# Visualizar o dataframe corrigido
+print(local)
+
+
+# Definir sua chave da API do OpenWeatherMap
+api_key <- "6ba409b8620d6bf2d4c2b890be5015e9"  # Substitua pela sua chave da API
+
+# Função para obter o clima com base em latitude e longitude
+obter_clima <- function(lat, lon, api_key) {
+  url <- paste0("http://api.openweathermap.org/data/2.5/weather?lat=", lat,
+                "&lon=", lon, "&appid=", api_key, "&units=metric&lang=pt")
+  
+  resposta <- GET(url)
+  
+  if (status_code(resposta) == 200) {
+    dados <- fromJSON(content(resposta, "text", encoding = "UTF-8"))
+    
+    # Retornar um dataframe com informações relevantes
+    return(data.frame(
+      temperatura = dados$main$temp,
+      condicao = dados$weather[[1]]$description,
+      umidade = dados$main$humidity,
+      velocidade_vento = dados$wind$speed
+    ))
+  } else {
+    return(data.frame(temperatura = NA, condicao = NA, umidade = NA, velocidade_vento = NA))
+  }
+}
+
+# Aplicar a função para cada cidade
+clima_dados <- local %>%
+  rowwise() %>%
+  mutate(clima = list(obter_clima(Latitude, Longitude, api_key))) %>%
+  unnest(clima)
+
+
+
+
 
 # Visualizar os primeiros registros
 head(dados)
@@ -53,3 +103,5 @@ estatisticas <- dados_expandido %>%
 # Exibir resultado
 print(estatisticas)
 
+# Exibir os dados de clima junto com a cidade
+print(clima_dados)
