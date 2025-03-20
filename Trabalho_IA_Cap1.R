@@ -1,74 +1,55 @@
 install.packages("dplyr") 
-install.packages("httr")
 install.packages("jsonlite")
+install.packages("tidyr")
 
 
-
-# Carregar os pacotes necessários
-library(httr)
 library(jsonlite)
 library(dplyr)
+library(tidyr)
 
-getwd()  # Mostra o diretório atual
 
-# Ler o arquivo CSV com os dados
-dados <- read.csv("dados_agricultura.csv", sep=",", header=TRUE)
+# Ler o arquivo CSV
+dados <- read.csv("dados_agricultura.csv", stringsAsFactors=FALSE)
 
-# Ler o arquivo CSV com a localização
-local <- read.csv("coordenadas.csv", sep=",", header=FALSE, stringsAsFactors=FALSE)
+# Visualizar os primeiros registros
+head(dados)
 
-# Exibir os dados
-print(dados)
-print(local)
-
-head(local)  # Exibe as cordenadas
-head(dados)  # Exibe as primeiras linhas do CSV
-str(dados)   # Mostra a estrutura dos dados
-
-# Função para conectar na API e pegar dados climáticos
-api_key <- "1104b47952d2b6a46276493eaa002c77"
-
-# Função para buscar dados climáticos por latitude e longitude
-obter_dados_clima <- function(lat, lon) {
-  url <- paste0("https://api.openweathermap.org/data/2.5/weather?lat=", 
-                lat, "&lon=", lon, "&appid=", api_key, "&units=metric&lang=pt")
-
-  # Requisição GET para a API
-  resposta <- GET(url)
-
-  # Verificar se a requisição foi bem-sucedida
-  if (status_code(resposta) == 200) {
-   local <- fromJSON(content(resposta, "text", encoding = "UTF-8"))
-
-    # Extrair informações principais
-    return(data.frame(
-      temperatura =local$main$temp,
-      sensacao_termica =local$main$feels_like,
-      umidade =local$main$humidity,
-      pressao =local$main$pressure,
-      descricao =local$weather[[1]]$description
-    ))
-  } else {
-    return(data.frame(temperatura=NA, sensacao_termica=NA, umidade=NA, pressao=NA, descricao="Erro na API"))
+# Função para converter a string JSON em lista
+processar_insumos <- function(insumos) {
+  if (insumos == "[]") {
+    return(data.frame(produto=NA, dose_por_metro=NA, total=NA))
   }
+  
+  # Substituir aspas simples por duplas para ser JSON válido
+  insumos <- gsub("'", "\"", insumos)
+  
+  # Converter de JSON para lista
+  lista <- fromJSON(insumos)
+  
+  # Transformar em DataFrame
+  return(as.data.frame(lista))
 }
 
-# Aplicando a função
-# Criar um novo dataframe com os dados climáticos
-dados_climaticos <- local %>%
+# Aplicar a função para cada linha da coluna 'insumos'
+dados_expandido <- dados %>%
   rowwise() %>%
-  mutate(info_clima = list(obter_dados_clima(Latitude, Longitude))) %>%
-  unnest(info_clima)
+  mutate(insumos_df = list(processar_insumos(insumos))) %>%
+  unnest(insumos_df)
 
+# Visualizar os dados convertidos
+head(dados_expandido)
 
-# Calcular estatísticas básicas
-media_area <- mean(dados$area, na.rm = TRUE)
-desvio_area <- sd(dados$area, na.rm = TRUE)
+# Calcular estatísticas por cultura
+estatisticas <- dados_expandido %>%
+  summarise(
+    media_area = mean(area, na.rm=TRUE),
+    desvio_area = sd(area, na.rm=TRUE),
+    media_dose = mean(dose_por_metro, na.rm=TRUE),
+    desvio_dose = sd(dose_por_metro, na.rm=TRUE),
+    media_total = mean(total, na.rm=TRUE),
+    desvio_total = sd(total, na.rm=TRUE)
+  )
 
-# Exibir os resultados
-cat("Média da área plantada:", media_area, "m²\n")
-cat("Desvio padrão da área plantada:", desvio_area, "m²\n")
-
-# Exibir os dados meteorológicos
-print(dados_climaticos)
+# Exibir resultado
+print(estatisticas)
 
