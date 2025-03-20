@@ -1,33 +1,39 @@
+# Instalando os pacotes
 install.packages("dplyr") 
 install.packages("jsonlite")
 install.packages("tidyr")
 install.packages("httr")
 
 
-
+# Ativando as bibliotecas
 library(jsonlite)
 library(dplyr)
 library(tidyr)
 library(httr)
 
+# Mostrando o diretório atual
+getwd()  
 
-getwd()  # Mostra o diretório atual
 
-# Ler o arquivo CSV
+# Lendo os arquivos
+
+# Ler o arquivo CSV de dados, gerado pela aplicação Python
 dados <- read.csv("dados_agricultura.csv", stringsAsFactors=FALSE)
 
-# Ler o arquivo CSV
+# Ler o arquivo CSV de coordenadas tambpém gerado pela aplicação Python
 local <- read.csv("coordenadas.csv", header = FALSE, sep = ",", stringsAsFactors = FALSE)
 
-# Renomear as colunas manualmente
+# Usando API e criando função para obter dados meteorológicos
+
+# Renomeando as colunas do arquivo de coordenadas
 colnames(local) <- c("Cidade", "Latitude", "Longitude")
 
-# Visualizar o dataframe corrigido
+# Visualizar o dataframe
 print(local)
 
 
-# Definir sua chave da API do OpenWeatherMap
-api_key <- "6ba409b8620d6bf2d4c2b890be5015e9"  # Substitua pela sua chave da API
+# Chave da API do OpenWeatherMap
+api_key <- "6ba409b8620d6bf2d4c2b890be5015e9"
 
 # Função para obter o clima com base em latitude e longitude
 obter_clima <- function(lat, lon, api_key) {
@@ -57,9 +63,7 @@ clima_dados <- local %>%
   mutate(clima = list(obter_clima(Latitude, Longitude, api_key))) %>%
   unnest(clima)
 
-
-
-
+# Funções para obter a média e desvio padrão da Área e dos Insumos utilizados.
 
 # Visualizar os primeiros registros
 head(dados)
@@ -70,7 +74,6 @@ processar_insumos <- function(insumos) {
     return(data.frame(produto=NA, dose_por_metro=NA, total=NA))
   }
   
-  # Substituir aspas simples por duplas para ser JSON válido
   insumos <- gsub("'", "\"", insumos)
   
   # Converter de JSON para lista
