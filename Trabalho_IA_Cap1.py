@@ -54,7 +54,7 @@ def menu():
                         print("Insumos: ")
                         for j, insumos in enumerate(dado["insumos"]):
                             print(f"      {j + 1}. {insumos['produto']} - {insumos['total']:.2f} mL")
-                            time.sleep(4)
+                            time.sleep(3)
         elif opcao == 4:
             for i, dado in enumerate(dados_culturas):
                 print(f"{i}: {dado['cultura']} - Área: {dado['area']:.2f} m²")
@@ -82,11 +82,18 @@ def menu():
         elif opcao == 6:
             print(("encerrando programa..."))
             time.sleep(1)
+
             # Salvar os dados coletados em um arquivo CSV
             df = pd.DataFrame(dados_culturas)
-            df.to_csv("dados_agricultura.csv", index=False)
-            print("Dados salvos em 'dados_agricultura.csv'.")
+            # Obter o diretório
+            caminho_atual = os.path.dirname(os.path.abspath(__file__))
+            caminho_arquivo = os.path.join(caminho_atual, "dados_agricultura.csv")
+
+            # Salvar o arquivo
+            df.to_csv(caminho_arquivo, index=False)
+            print(f"Dados salvos em '{caminho_arquivo}'.")
             break
+
 #funcao para obter cordenadas de uma cidade
 def obter_coordenadas(cidade):
     url = f"https://geocoding-api.open-meteo.com/v1/search?name={cidade}&count=1&format=json"
@@ -136,10 +143,17 @@ else:
     area_plantio = (raio ** 2) * 3.14
 print("Calculando Area..")
 time.sleep(1)
+
 cidade = input("Informe o nome da cidade do terreno: ")
 latitude, longitude = obter_coordenadas(cidade)
-with open("coordenadas.csv", "w") as f:
+# Obter o diretório
+caminho_atual = os.path.dirname(os.path.abspath(__file__))
+caminho_arquivo = os.path.join(caminho_atual, "coordenadas.csv")
+# Abrir o arquivo e escrever os dados
+with open(caminho_arquivo, "w") as f:
     f.write(f"{cidade},{latitude},{longitude}")
-print(f"Cidade {cidade} salva!")
+
+print(f"Dados salvos em '{caminho_arquivo}'.")
+
 
 menu()
